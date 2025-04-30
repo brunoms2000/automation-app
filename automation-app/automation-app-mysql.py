@@ -45,126 +45,291 @@ class Functions:
 
     def create_audit(self, username, response, message):
         # Para criar uma nova informação na tabela audit do banco de dados
-        self.conecta_bd()
-        data = (username, response, message)
-        self.comando = f"""
-        INSERT INTO audit (username, response, message) 
-        VALUES (?, ?, ?)
-        """
-        self.cursor.execute(self.comando, data)
-        self.connection.commit()
-        self.desconecta_bd()
+        try:
+            self.conecta_bd()
+            data = (username, response, message)
+            self.comando = """
+            INSERT INTO audit (username, response, message) 
+            VALUES (%s, %s, %s)
+            """
+            self.cursor.execute(self.comando, data)
+            self.connection.commit()
+        except mysql.connector.Error as e:
+            print(f"Erro ao inserir na tabela audit: {e}")
+            # Tenta registrar o erro no banco como fallback
+            try:
+                self.conecta_bd()
+                erro_data = (
+                    "audit",
+                    "create_error",
+                    f"Falha ao registrar log original: {str(e)}",
+                )
+                erro_comando = """
+                INSERT INTO logs_errors (table, response_error, message_error)
+                VALUES (%s, %s, %s)
+                """
+                self.cursor.execute(erro_comando, erro_data)
+                self.connection.commit()
+            except Exception as fallback_err:
+                print(f"Falha também ao tentar registrar o erro: {fallback_err}")
+            finally:
+                self.desconecta_bd()
+        finally:
+            self.desconecta_bd()
 
     def create_users(self, username, password):
-        # Para criar uma nova informação nas colunas username e password da tabela users do banco de dados
-        self.conecta_bd()
-        data = (username, password)
-        self.comando = f"""
-        INSERT INTO users (username, password)
-        VALUES (?, ?)
-        """
-        self.cursor.execute(self.comando, data)
-        self.connection.commit()
-        self.desconecta_bd()
+        try:
+            # Para criar uma nova informação nas colunas username e password da tabela users do banco de dados
+            self.conecta_bd()
+            data = (username, password)
+            self.comando = """
+            INSERT INTO users (username, password)
+            VALUES (%s, %s)
+            """
+            self.cursor.execute(self.comando, data)
+            self.connection.commit()
+        except mysql.connector.Error as e:
+            print(f"Erro ao inserir na tabela users: {e}")
+            # Tenta registrar o erro no banco como fallback
+            try:
+                self.conecta_bd()
+                erro_data = (
+                    "users",
+                    "create_error",
+                    f"Falha ao registrar log original: {str(e)}",
+                )
+                erro_comando = """
+                INSERT INTO logs_errors (table, response_error, message_error)
+                VALUES (%s, %s, %s)
+                """
+                self.cursor.execute(erro_comando, erro_data)
+                self.connection.commit()
+            except Exception as fallback_err:
+                print(f"Falha também ao tentar registrar o erro: {fallback_err}")
+            finally:
+                self.desconecta_bd()
+        finally:
+            self.desconecta_bd()
 
     def create_performance(
         self, username, automation, clicks, duration_sec, clients_qty
     ):
-        # Para criar uma nova informação nas colunas username e password da tabela performance do banco de dados
-        self.conecta_bd()
-        data = (username, automation, clicks, duration_sec, clients_qty)
-        self.comando = f"""
-        INSERT INTO performance (username, automation, clicks, duration_sec, clients_qty)
-        VALUES (?, ?, ?, ?, ?)
-        """
-        self.cursor.execute(self.comando, data)
-        self.connection.commit()
-        self.desconecta_bd()
+        try:
+            # Para criar uma nova informação nas colunas username e password da tabela performance do banco de dados
+            self.conecta_bd()
+            data = (username, automation, clicks, duration_sec, clients_qty)
+            self.comando = """
+            INSERT INTO performance (username, automation, clicks, duration_sec, clients_qty)
+            VALUES (%s, %s, %s, %s, %s)
+            """
+            self.cursor.execute(self.comando, data)
+            self.connection.commit()
+        except mysql.connector.Error as e:
+            print(f"Erro ao inserir na tabela performance: {e}")
+            # Tenta registrar o erro no banco como fallback
+            try:
+                self.conecta_bd()
+                erro_data = (
+                    "performance",
+                    "create_error",
+                    f"Falha ao registrar log original: {str(e)}",
+                )
+                erro_comando = """
+                INSERT INTO logs_errors (table, response_error, message_error)
+                VALUES (%s, %s, %s)
+                """
+                self.cursor.execute(erro_comando, erro_data)
+                self.connection.commit()
+            except Exception as fallback_err:
+                print(f"Falha também ao tentar registrar o erro: {fallback_err}")
+            finally:
+                self.desconecta_bd()
+        finally:
+            self.desconecta_bd()
 
     def update_users(self, password, username):
-        # Para editar uma informação da tabela users do banco de dados
-        self.conecta_bd()
-        data = (username, password)
-        self.comando = f"""
-        UPDATE users
-        SET password = ?
-        WHERE username = ?
-        """
-        self.cursor.execute(self.comando, data)
-        self.connection.commit()
-        self.desconecta_bd()
+        try:
+            # Para editar uma informação da tabela users do banco de dados
+            self.conecta_bd()
+            data = (username, password)
+            self.comando = """
+            UPDATE users
+            SET password = %s
+            WHERE username = %s
+            """
+            self.cursor.execute(self.comando, data)
+            self.connection.commit()
+        except mysql.connector.Error as e:
+            print(f"Erro ao atualizar na tabela users: {e}")
+            # Tenta registrar o erro no banco como fallback
+            try:
+                self.conecta_bd()
+                erro_data = (
+                    "users",
+                    "update_error",
+                    f"Falha ao atualizar log original: {str(e)}",
+                )
+                erro_comando = """
+                INSERT INTO logs_errors (table, response_error, message_error)
+                VALUES (%s, %s, %s)
+                """
+                self.cursor.execute(erro_comando, erro_data)
+                self.connection.commit()
+            except Exception as fallback_err:
+                print(f"Falha também ao tentar registrar o erro: {fallback_err}")
+            finally:
+                self.desconecta_bd()
+        finally:
+            self.desconecta_bd()
 
     def read_all_users(self):
-        # Para ler a tabela users inteira do banco de dados
-        self.conecta_bd()
-        self.comando = f"""
-        SELECT *
-        FROM users
-        """
-        self.cursor.execute(self.comando)
-        self.df = self.cursor.fetchall()
-        self.desconecta_bd()
-        return self.df
+        result = None
+        try:
+            # Para ler a tabela users inteira do banco de dados
+            self.conecta_bd()
+            self.comando = """
+            SELECT *
+            FROM users
+            """
+            self.cursor.execute(self.comando)
+            self.df = self.cursor.fetchall()
+            result = self.df
+        except mysql.connector.Error as e:
+            print(f"Erro ao ler na tabela users: {e}")
+            # Tenta registrar o erro no banco como fallback
+            try:
+                self.conecta_bd()
+                erro_data = (
+                    "users",
+                    "read_error",
+                    f"Falha ao ler, log original: {str(e)}",
+                )
+                erro_comando = """
+                INSERT INTO logs_errors (table, response_error, message_error)
+                VALUES (%s, %s, %s)
+                """
+                self.cursor.execute(erro_comando, erro_data)
+                self.connection.commit()
+            except Exception as fallback_err:
+                print(f"Falha também ao tentar registrar o erro: {fallback_err}")
+            finally:
+                self.desconecta_bd()
+            result = "Error"
+        finally:
+            self.desconecta_bd()
+            return result
 
     def read_username_users(self, username):
-        # Para ler a linha de um usuário em específico da tabela users do banco de dados
-        self.conecta_bd()
-        self.comando = f"""
-        SELECT *
-        FROM users
-        WHERE username = "{username}"
-        """
-        self.cursor.execute(self.comando)
-        self.df = self.cursor.fetchall()
-        self.desconecta_bd()
-        return self.df
+        result = None
+        try:
+            # Para ler a linha de um usuário em específico da tabela users do banco de dados
+            self.conecta_bd()
+            data = (username,)
+            self.comando = """
+            SELECT *
+            FROM users
+            WHERE username = %s
+            """
+            self.cursor.execute(self.comando, data)
+            self.df = self.cursor.fetchall()
+            result = self.df
+        except mysql.connector.Error as e:
+            print(f"Erro ao ler na tabela users: {e}")
+            # Tenta registrar o erro no banco como fallback
+            try:
+                self.conecta_bd()
+                erro_data = (
+                    "users",
+                    "read_error",
+                    f"Falha ao ler, log original: {str(e)}",
+                )
+                erro_comando = """
+                INSERT INTO logs_errors (table, response_error, message_error)
+                VALUES (%s, %s, %s)
+                """
+                self.cursor.execute(erro_comando, erro_data)
+                self.connection.commit()
+            except Exception as fallback_err:
+                print(f"Falha também ao tentar registrar o erro: {fallback_err}")
+            finally:
+                self.desconecta_bd()
+            result = "Error"
+        finally:
+            self.desconecta_bd()
+            return result
 
     def login(self, username_entry, password_entry):
         self.username = username_entry.get()
         self.password = password_entry.get()
         self.users = users
         if self.username in self.users:
-            self.users_df = self.read_all_userstest()
-            if any(self.username in item for item in self.users_df):
-                self.verify = self.read_username_userstest(self.username)
-                if any(self.password in item for item in self.verify):
-                    self.create_audittests(
-                        self.username, "successful login", "Login bem-sucedido"
-                    )
-                    if self.username == "user1":
-                        print("open_user1_automations_window")
-                    elif self.username == "user2":
-                        print("open_user2_automations_window")
-                    elif self.username == "user3":
-                        print("open_user3_automations_window")
-                    elif self.username == "user4":
-                        print("open_user4_automations_window")
-                    elif self.username == "user5":
-                        print("open_user5_automations_window")
+            self.users_df = self.read_all_users()
+            if not self.users_df == "Error":
+                if any(self.username in item for item in self.users_df):
+                    self.verify = self.read_username_users(self.username)
+                    if not self.verify == "Error":
+                        if any(self.password in item for item in self.verify):
+                            self.create_audit(
+                                self.username, "successful login", "Login bem-sucedido"
+                            )
+                            if self.username == "user1":
+                                print("open_user1_automations_window")
+                            elif self.username == "user2":
+                                print("open_user2_automations_window")
+                            elif self.username == "user3":
+                                print("open_user3_automations_window")
+                            elif self.username == "user4":
+                                print("open_user4_automations_window")
+                            elif self.username == "user5":
+                                print("open_user5_automations_window")
+                            else:
+                                self.automations_test_window()
+                        else:
+                            self.create_audit(
+                                self.username,
+                                "login failed",
+                                "Falha no login: senha incorreta",
+                            )
+                            self.login_message_label.configure(
+                                text="Senha inválida.", text_color="#D61736"
+                            )
                     else:
-                        self.automations_test_window()
+                        self.create_audit(
+                            self.username,
+                            "login failed",
+                            "Falha no login: erro na conexão com o banco de dados users",
+                        )
+                        self.login_message_label.configure(
+                            text="""Erro de conexão ao banco de dados.
+                        \nPor favor, contate a equipe de suporte.
+                        """,
+                            text_color="#D61736",
+                        )
                 else:
-                    self.create_audittests(
-                        self.username, "login failed", "Falha no login: senha incorreta"
+                    self.create_audit(
+                        self.username,
+                        "login failed",
+                        "Falha no login: senha não cadastrada",
                     )
                     self.login_message_label.configure(
-                        text="Senha inválida.", text_color="#D61736"
+                        text=r"""Senha não cadastrada para o usuário informado, cadastrar senha ao clicar em "Registrar Senha".
+                        """,
+                        text_color="#D61736",
                     )
-
             else:
-                self.create_audittests(
+                self.create_audit(
                     self.username,
                     "login failed",
-                    "Falha no login: senha não cadastrada",
+                    "Falha no login: erro na conexão com o banco de dados users",
                 )
                 self.login_message_label.configure(
-                    text=r"""Senha não cadastrada para o usuário informado, 
-cadastrar senha ao clicar em "Registrar Senha".
-                    """,
+                    text="""Erro de conexão ao banco de dados.
+                \nPor favor, contate a equipe de suporte.
+                """,
                     text_color="#D61736",
                 )
         else:
-            self.create_audittests(
+            self.create_audit(
                 self.username,
                 "login failed",
                 "Falha no login: usuário pré-cadastrado não encontrado",
@@ -183,40 +348,53 @@ cadastrar senha ao clicar em "Registrar Senha".
         self.confirmation_info = confirmation_entry.get()
         self.users = users
         if self.username_info in self.users:
-            self.users_df = self.read_all_userstest()
-            if any(self.username_info in item for item in self.users_df):
-                self.create_audittests(
-                    self.username_info,
-                    "register failed",
-                    "Falha no registro: já existe uma senha cadastrada",
-                )
-                self.register_message_label.configure(
-                    text="Já existe uma senha criada para esse usuário.",
-                    text_color="#D61736",
-                )
-            elif self.password_info == self.confirmation_info:
-                self.create_userstest(self.username_info, self.password_info)
-                self.create_audittests(
-                    self.username_info,
-                    "successful registration",
-                    "Registro de senha bem-sucedido",
-                )
-                self.register_message_label.configure(
-                    text="Senha salva com sucesso! Pode voltar para a área de login.",
-                    text_color="#002621",
-                )
+            self.users_df = self.read_all_users()
+            if not self.users_df == "Error":
+                if any(self.username_info in item for item in self.users_df):
+                    self.create_audit(
+                        self.username_info,
+                        "register failed",
+                        "Falha no registro: já existe uma senha cadastrada",
+                    )
+                    self.register_message_label.configure(
+                        text="Já existe uma senha criada para esse usuário.",
+                        text_color="#D61736",
+                    )
+                elif self.password_info == self.confirmation_info:
+                    self.create_users(self.username_info, self.password_info)
+                    self.create_audit(
+                        self.username_info,
+                        "successful registration",
+                        "Registro de senha bem-sucedido",
+                    )
+                    self.register_message_label.configure(
+                        text="Senha salva com sucesso! Pode voltar para a área de login.",
+                        text_color="#002621",
+                    )
+                else:
+                    self.create_audit(
+                        self.username_info,
+                        "register failed",
+                        "Falha no registro: senha e confirmação de senha incompatíveis",
+                    )
+                    self.register_message_label.configure(
+                        text="Senha e confirmação de senha não estão compatíveis.",
+                        text_color="#D61736",
+                    )
             else:
-                self.create_audittests(
-                    self.username_info,
-                    "register failed",
-                    "Falha no registro: senha e confirmação de senha incompatíveis",
+                self.create_audit(
+                    self.username,
+                    "login failed",
+                    "Falha no login: erro na conexão com o banco de dados users",
                 )
-                self.register_message_label.configure(
-                    text="Senha e confirmação de senha não estão compatíveis.",
+                self.login_message_label.configure(
+                    text="""Erro de conexão ao banco de dados.
+                \nPor favor, contate a equipe de suporte.
+                """,
                     text_color="#D61736",
                 )
         else:
-            self.create_audittests(
+            self.create_audit(
                 self.username_info,
                 "register failed",
                 "Falha no registro: usuário pré-cadastrado não encontrado",
@@ -235,42 +413,54 @@ cadastrar senha ao clicar em "Registrar Senha".
         self.confirmation_info = confirmation_entry.get()
         self.users = users
         if self.username_info in self.users:
-            self.users_df = self.read_all_userstest()
-            if any(self.username_info in item for item in self.users_df):
-                if self.password_info == self.confirmation_info:
-                    self.update_userstest(self.password_info, self.username_info)
-                    self.create_audittests(
-                        self.username_info,
-                        "successful reset",
-                        "Redefinição de senha bem-sucedida",
-                    )
-                    self.redefinition_message_label.configure(
-                        text="Senha salva com sucesso! Pode voltar para a área de login.",
-                        text_color="#002621",
-                    )
+            self.users_df = self.read_all_users()
+            if not self.users_df == "Error":
+                if any(self.username_info in item for item in self.users_df):
+                    if self.password_info == self.confirmation_info:
+                        self.update_users(self.password_info, self.username_info)
+                        self.create_audit(
+                            self.username_info,
+                            "successful reset",
+                            "Redefinição de senha bem-sucedida",
+                        )
+                        self.redefinition_message_label.configure(
+                            text="Senha salva com sucesso! Pode voltar para a área de login.",
+                            text_color="#002621",
+                        )
+                    else:
+                        self.create_audit(
+                            self.username_info,
+                            "reset failed",
+                            "Falha na redefinição: senha e confirmação de senha incompatíveis",
+                        )
+                        self.redefinition_message_label.configure(
+                            text="Nova senha e confirmação da nova senha não estão compatíveis.",
+                            text_color="#D61736",
+                        )
                 else:
-                    self.create_audittests(
+                    self.create_audit(
                         self.username_info,
                         "reset failed",
-                        "Falha na redefinição: senha e confirmação de senha incompatíveis",
+                        "Falha na redefinição: não existe senha cadastrada",
                     )
                     self.redefinition_message_label.configure(
-                        text="Nova senha e confirmação da nova senha não estão compatíveis.",
+                        text="""Usuário ainda não possuí senha criada para poder redefini-la, cadastrar senha ao clicar em "Registrar Senha" na área de login.""",
                         text_color="#D61736",
                     )
             else:
-                self.create_audittests(
-                    self.username_info,
-                    "reset failed",
-                    "Falha na redefinição: não existe senha cadastrada",
+                self.create_audit(
+                    self.username,
+                    "login failed",
+                    "Falha no login: erro na conexão com o banco de dados users",
                 )
-                self.redefinition_message_label.configure(
-                    text="""Usuário ainda não possuí senha criada para poder redefini-la, 
-cadastrar senha ao clicar em "Registrar Senha" na área de login.""",
+                self.login_message_label.configure(
+                    text="""Erro de conexão ao banco de dados.
+                \nPor favor, contate a equipe de suporte.
+                """,
                     text_color="#D61736",
                 )
         else:
-            self.create_audittests(
+            self.create_audit(
                 self.username_info,
                 "reset failed",
                 "Falha na redefinição: usuário pré-cadastrado não encontrado",
@@ -307,7 +497,7 @@ cadastrar senha ao clicar em "Registrar Senha" na área de login.""",
         )
         if self.status == True:
             self.keep_running = False
-            self.create_audittests(
+            self.create_audit(
                 self.username,
                 f"{automation}_interrupt",
                 f"Execução da automação {automation} interrompida pelo usuário",
@@ -334,7 +524,7 @@ cadastrar senha ao clicar em "Registrar Senha" na área de login.""",
         self.automation = "Form_Filling"
         # Iniciando contagem do tempo de duração da automação
         self.start_time = time.time()
-        self.create_audittests(
+        self.create_audit(
             self.username,
             "form_filling_start",
             "Início da execução da automação form filling",
@@ -452,7 +642,7 @@ cadastrar senha ao clicar em "Registrar Senha" na área de login.""",
                 # Atualizar o valor da barra de progresso
                 self.progress_bar.set(float(progress_percent) / 100)
             except:
-                self.create_audittests(
+                self.create_audit(
                     self.username,
                     "form_filling_error",
                     "Falha na execução da automação form filling",
@@ -468,7 +658,7 @@ cadastrar senha ao clicar em "Registrar Senha" na área de login.""",
         self.end_time = time.time()
         # Atribuindo tempo de duração em segundos do código à variável 'duration_time'
         self.duration_time = int(self.end_time - self.start_time)
-        self.create_performancetest(
+        self.create_performance(
             self.username,
             self.automation,
             self.total_clicks,
@@ -476,7 +666,7 @@ cadastrar senha ao clicar em "Registrar Senha" na área de login.""",
             self.total_rows,
         )
         if self.keep_running:
-            self.create_audittests(
+            self.create_audit(
                 self.username,
                 "form_filling_end",
                 "Fim da execução da automação form filling",
